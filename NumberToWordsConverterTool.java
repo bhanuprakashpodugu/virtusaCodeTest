@@ -6,6 +6,16 @@ import java.util.Scanner;
 
 public class NumberToWordsConverterTool {
 	
+	private static final String[] specialNames = {
+	        "",
+	        " thousand",
+	        " million",
+	        " billion",
+	        " trillion",
+	        " quadrillion",
+	        " quintillion"
+	    };
+	
 	public static final String[] units = { "", "One", "Two", "Three", "Four",
 			"Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
 			"Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
@@ -24,33 +34,50 @@ public class NumberToWordsConverterTool {
 			"Ninety" 	// 9
 	};
 	
-	public static String convert(final int input) {
-		if (input < 0) {
-			return "Minus " + convert(-input);
-		}
+	private static String convertLessThanOneThousand(int number) {
+        String current;
+        
+        if (number % 100 < 20){
+            current = units[number % 100];
+            number /= 100;
+        }
+        else {
+            current = units[number % 10];
+            number /= 10;
+            
+            current = tensPosition[number % 10] + current;
+            number /= 10;
+        }
+        if (number == 0) return current;
+        return units[number] + " hundred" + current;
+    }
+	
+	 public static String convert(int number) {
 
-		if (input < 20) {
-			return units[input];
-		}
-
-		if (input < 100) {
-			return tensPosition[input / 10] + ((input % 10 != 0) ? " " : "") + units[input % 10];
-		}
-
-		if (input < 1000) {
-			return units[input / 100] + " Hundred" + ((input % 100 != 0) ? " " : "") + convert(input % 100);
-		}
-
-		if (input < 100000) {
-			return convert(input / 1000) + " Thousand" + ((input % 10000 != 0) ? " " : "") + convert(input % 1000);
-		}
-
-		if (input < 10000000) {
-			return convert(input / 100000) + " Lakh" + ((input % 100000 != 0) ? " " : "") + convert(input % 100000);
-		}
-
-		return convert(input / 10000000) + " Crore" + ((input % 10000000 != 0) ? " " : "") + convert(input % 10000000);
-	}
+	        if (number == 0) { return "zero"; }
+	        
+	        String prefix = "";
+	        
+	        if (number < 0) {
+	            number = -number;
+	            prefix = "negative";
+	        }
+	        
+	        String current = "";
+	        int place = 0;
+	        
+	        do {
+	            int n = number % 1000;
+	            if (n != 0){
+	                String s = convertLessThanOneThousand(n);
+	                current = s + specialNames[place] + current;
+	            }
+	            place++;
+	            number /= 1000;
+	        } while (number > 0);
+	        
+	        return (prefix + current).trim();
+	    }
 	
 	public static void main(final String[] args) {
 
